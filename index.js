@@ -95,6 +95,20 @@ async function run() {
    res.send(result)
   })
 
+  app.patch("/classes/:id", async(req,res)=>{
+    const id = req.params.id;
+    const filter = { _id: new ObjectId(id) };
+    const updateStatus ={
+      $set: {
+        status: "deny"
+      }
+    }
+    const result = await classesCollection.updateOne(filter, updateStatus);
+    res.send(result)
+    })
+
+  
+
      //FOR INSTRUCTORS
      const verifyInstructor = async(req, res, next)=>{
       const email = req.decoded.email;
@@ -105,6 +119,7 @@ async function run() {
       }
       next()
      }
+
 //verifyinstructor
 
     app.get('/users', verifyJwt, verifyInstructor, async(req,res)=>{
