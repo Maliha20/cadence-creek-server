@@ -125,6 +125,14 @@ async function run() {
      res.send(result)
     })
 
+    //instructor adds class
+
+    app.post('/addClass', async(req,res)=>{
+      const newClass = req.body
+      const result = await classesCollection.insertOne(newClass)
+      res.send(result)
+    })
+
     app.patch("/users/admin/:id",async(req, res)=>{
       const id = req.params.id;
       const query = {_id : new ObjectId(id)};
