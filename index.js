@@ -148,10 +148,14 @@ async function run() {
 
     //instructor adds class
 
-    app.post('/addClass', async(req,res)=>{
+    app.post('/addClass', verifyJwt, verifyInstructor, async(req,res)=>{
       const newClass = req.body
       const result = await classesCollection.insertOne(newClass)
       res.send(result)
+    })
+    app.get('/classes', async(req,res)=>{
+      const result = await classesCollection.find().toArray();
+      res.send(result);
     })
   
     //instructor
