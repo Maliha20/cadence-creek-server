@@ -95,6 +95,8 @@ async function run() {
    res.send(result)
   })
 
+
+  //class deny
   app.patch("/classes/:id", async(req,res)=>{
     const id = req.params.id;
     const filter = { _id: new ObjectId(id) };
@@ -106,6 +108,8 @@ async function run() {
     const result = await classesCollection.updateOne(filter, updateStatus);
     res.send(result)
     })
+
+    //class approve
 
   
 
