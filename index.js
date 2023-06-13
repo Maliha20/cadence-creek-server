@@ -182,8 +182,20 @@ async function run() {
       const result = await classesCollection.insertOne(newClass)
       res.send(result)
     })
+
     app.get('/classes', async(req,res)=>{
       const result = await classesCollection.find().toArray();
+      res.send(result);
+    })
+    
+    app.get('/approvedClasses', async(req,res)=>{
+      const result = await classesCollection.find({status: 'approved'}).toArray();
+      res.send(result);
+    })
+
+    //all instructors
+    app.get('/user/instructor', async(req,res)=>{
+      const result = await usersCollection.find( { role: 'instructor' }).toArray();
       res.send(result);
     })
 
