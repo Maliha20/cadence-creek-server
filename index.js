@@ -97,20 +97,30 @@ async function run() {
 
 
   //class deny
-  app.patch("/classes/:id", async(req,res)=>{
+  app.patch("/classes/deny/:id", async(req,res)=>{
     const id = req.params.id;
-    const filter = { _id: new ObjectId(id) };
+    const query = { _id: new ObjectId(id) };
     const updateStatus ={
       $set: {
         status: "deny"
       }
     }
-    const result = await classesCollection.updateOne(filter, updateStatus);
+    const result = await classesCollection.updateOne(query, updateStatus);
     res.send(result)
     })
 
-    //class approve
-
+    // class approve
+    app.patch("/classes/approve/:id", async(req,res)=>{
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updateStatus ={
+        $set: {
+          status: "approve"
+        }
+      }
+      const result = await classesCollection.updateOne(query, updateStatus);
+      res.send(result)
+      })
   
 
      //FOR INSTRUCTORS
@@ -176,7 +186,8 @@ async function run() {
       const result = await classesCollection.find().toArray();
       res.send(result);
     })
-  
+
+   
     //instructor
     app.patch("/users/instructor/:id",async(req, res)=>{
       const id = req.params.id;
