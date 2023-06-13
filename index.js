@@ -102,7 +102,7 @@ async function run() {
     const query = { _id: new ObjectId(id) };
     const updateStatus ={
       $set: {
-        status: "deny"
+        status: "denied"
       }
     }
     const result = await classesCollection.updateOne(query, updateStatus);
@@ -115,7 +115,7 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const updateStatus ={
         $set: {
-          status: "approve"
+          status: "approved"
         }
       }
       const result = await classesCollection.updateOne(query, updateStatus);
@@ -186,6 +186,15 @@ async function run() {
       const result = await classesCollection.find().toArray();
       res.send(result);
     })
+
+    //MY CLASSES
+    app.get('/classes/:email', async (req, res) => {
+      const { email } = req.params;
+    
+      const result = await classesCollection
+        .find({ email: email }).toArray();
+         res.send(result);
+    });
 
    
     //instructor
