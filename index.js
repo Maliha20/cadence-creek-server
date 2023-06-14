@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
+const stripe = require('stripe')(process.env.payment_secret_key)
 app=express()
 app.use(cors())
 app.use(express.json())
@@ -50,11 +51,61 @@ async function run() {
     
     const usersCollection = client.db('musicDB').collection("users")
     const classesCollection = client.db('musicDB').collection("classes")
-    const instructorsCollection = client.db('musicDB').collection("instructors")
+    const CartCollection = client.db('musicDB').collection("Cart")
+    const paymentCollection = client.db('musicDB').collection("payment")
     
 
 
-//use verify jawt before verify admin
+ //////CART//////////
+
+ app.get('/carts', async(req,res)=>{
+  const email= req.query.email;
+  if (!email) {
+    res.send([]);
+  }
+
+  const query = { email: email };
+  const result = await CartCollection.find(query).toArray();
+  res.send(result)
+
+ } )
+
+ 
+ 
+  app.post('/carts',async(req,res)=>{
+    const course = req.body
+    const result = await CartCollection.insertOne(course)
+    res.send(result)
+  })
+
+  app.delete("/carts/:id", async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+    const result = await CartCollection.deleteOne(query);
+    res.send(result);
+  });
+
+  app.post('/create-payment-intent', verifyJwt, async(req,res)=>{
+    const {price}= req.body;
+    const amount= price*100;
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount:amount,
+      currency:'usd',
+      payment_method_types:['card']
+    })
+    res.send({
+      clientSecret: paymentIntent.client_secret
+    })
+  })
+ app.post('/payments', async(req,res)=>{
+  const payment = req.body
+  const result = await paymentCollection.insertOne(payment)
+
+  const query ={_id:{$in: payment.cartItem.map((id)=> new ObjectId(id))}}
+  const deleteResult = await CartCollection.deleteMany(query)
+  res.send({result, deleteResult})
+ })
+//use verify jawt before verify admin//
 
      const verifyAdmin = async(req, res, next)=>{
       const email = req.decoded.email;
@@ -156,10 +207,6 @@ async function run() {
     })
 
    
-    // const decodedEmail = req.decoded.email;
-    // if(email !==decodedEmail){
-    // return res.status(403).send({error:true, message: 'Access prohibited'})
-    // }
 
 
 
@@ -219,6 +266,19 @@ async function run() {
       }
      }
      const result = await usersCollection.updateOne(query , updatedDoc);
+     res.send(result)
+    })
+
+    ////FOR STUDENTS
+
+    app.get("/users/student/:email", verifyJwt,async(req, res)=>{
+      const email = req.params.email;
+      if(req.decoded.email !== email){
+        res.send({student:false})
+      }
+      const query = {email: email};
+     const user = await usersCollection.findOne(query)
+     const result = {student : user?.role === "student"}
      res.send(result)
     })
  
